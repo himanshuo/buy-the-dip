@@ -7,7 +7,7 @@
     [] Bollinger bands
     [x] Open/close has greater than 3%
     [] Compare to see if it matches the sp500 or the index that the stock belongs to
-[] Gemini search to see if anything big has happened with the stock causing this
+[x] Gemini search to see if anything big has happened with the stock causing this
 [] More Gemini searches to predict. 
 [] Ask user for decision, or more questions.
 [] Eventually buy or not. 

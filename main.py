@@ -1,9 +1,7 @@
 import yfinance as yf
-import pandas as pd
-from datetime import datetime, timedelta
-import json
-import os
 from rich import print
+from google import genai
+from google.genai import types
 
 SAFE_STOCK_LIST = ['NFLX', 'QTUM', 'AAPL', 'GOOG', 'BRK/B', 'COST', 'WMT']
 
@@ -40,10 +38,26 @@ def screen():
             alerts.append((stock, data))
     return alerts
 
+def call_gemini(ticker_symbol):
+    client = genai.Client()
+    grounding_tool = types.Tool(
+        google_search=types.GoogleSearch()
+    )
+    config = types.GenerateContentConfig(
+        tools=[grounding_tool]
+    )
+    query = f'Why was there a drop in stock price for {ticker_symbol} in the past day? Please consult financial news sources, analyst reports, and SEC filings related to Netflix for the past day to figure out why it dropped.'
+    response = client.models.generate_content(
+        model="gemini-2.5-flash",
+        contents=query,
+        config=config,
+    )
+
+    print(response.text)
 
 def main():
-    print(screen())
-
+    for ticker in screen():
+        call_gemini(ticker)
 
 if __name__ == '__main__':
     main()
