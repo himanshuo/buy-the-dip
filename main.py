@@ -65,7 +65,32 @@ def send_notification(ticker, price_data, gemini_resp):
   		data={"from": "Mailgun Sandbox <postmaster@sandboxae39eddfee26494d9dc97ed6713b531b.mailgun.org>",
 			"to": "Himanshu Ojha <himanshuo@gmail.com>",
   			"subject": f"[Buy-The-Dip] {ticker}",
-  			"text": f"{ticker} {price_data} {gemini_resp}"})
+  			"text": format_email_contents(ticker, price_data, gemini_resp)})
+
+def change_price_str(current_price, other_price):
+    price_diff_percentage =  (current_price - other_price) / other_price * 100
+    return f"${other_price:.2f} (current price is {price_diff_percentage:.2f}%)"
+
+def format_email_contents(ticker, price_data, gemini_resp):
+    current_price_str = f"${price_data['current_price']:.2f}"
+    price_at_open_str = change_price_str(price_data['current_price'], price_data['price_at_open'])
+    price_at_close_str = change_price_str(price_data['current_price'], price_data['price_at_close'])
+    price_at_high_str = change_price_str(price_data['current_price'], price_data['price_at_high'])
+
+    return f"""{ticker} 
+
+Price Details:
+- Current Price: {current_price_str}
+- Price at Open: {price_at_open_str}
+- Previous Close: {price_at_close_str}
+- Day's High: {price_at_high_str}
+
+Gemini Summary:
+{gemini_resp}
+
+Regards,
+Your Buy-The-Dip Bot
+"""
 
 def main():
     for ticker, price_data in screen():
