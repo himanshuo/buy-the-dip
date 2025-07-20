@@ -2,10 +2,10 @@
 
 ### TODO
 
-[] Safe stock list. Maybe ETF list.   
-[] For each safe stock, fetch prices to see if anything sudden has happened
+[x] Safe stock list. Maybe ETF list.   
+[x] For each safe stock, fetch prices to see if anything sudden has happened
     [] Bollinger bands
-    [] Open/close has greater than 3%
+    [x] Open/close has greater than 3%
     [] Compare to see if it matches the sp500 or the index that the stock belongs to
 [] Gemini search to see if anything big has happened with the stock causing this
 [] More Gemini searches to predict. 
