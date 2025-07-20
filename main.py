@@ -4,8 +4,9 @@ from google import genai
 from google.genai import types
 import os
 import requests
+from stock_list import TOP_ETFS, SP100
 
-SAFE_STOCK_LIST = ['NFLX', 'QTUM', 'AAPL', 'GOOG', 'BRK/B', 'COST', 'WMT']
+SAFE_STOCK_LIST = TOP_ETFS + SP100
 
 def fetch_stock_data(ticker_symbol):
     try:
@@ -34,8 +35,8 @@ def alert(data):
 
 def screen():
     alerts = []
-    for stock in SAFE_STOCK_LIST[:1]:
-        data = fetch_stock_data(SAFE_STOCK_LIST[0])
+    for stock in SAFE_STOCK_LIST:
+        data = fetch_stock_data(stock)
         if alert(data):
             alerts.append((stock, data))
     return alerts
