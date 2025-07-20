@@ -2,6 +2,8 @@ import yfinance as yf
 from rich import print
 from google import genai
 from google.genai import types
+import os
+import requests
 
 SAFE_STOCK_LIST = ['NFLX', 'QTUM', 'AAPL', 'GOOG', 'BRK/B', 'COST', 'WMT']
 
@@ -54,10 +56,21 @@ def call_gemini(ticker_symbol):
     )
 
     print(response.text)
+    return response.text
+
+def send_notification(ticker, price_data, gemini_resp):
+  	return requests.post(
+  		"https://api.mailgun.net/v3/sandboxae39eddfee26494d9dc97ed6713b531b.mailgun.org/messages",
+  		auth=("api", os.environ['MAILGUN_SEND_KEY']),
+  		data={"from": "Mailgun Sandbox <postmaster@sandboxae39eddfee26494d9dc97ed6713b531b.mailgun.org>",
+			"to": "Himanshu Ojha <himanshuo@gmail.com>",
+  			"subject": f"[Buy-The-Dip] {ticker}",
+  			"text": f"{ticker} {price_data} {gemini_resp}"})
 
 def main():
-    for ticker in screen():
-        call_gemini(ticker)
+    for ticker, price_data in screen():
+        gemini_resp = call_gemini(ticker)
+        send_notification(ticker, price_data, gemini_resp)
 
 if __name__ == '__main__':
     main()
