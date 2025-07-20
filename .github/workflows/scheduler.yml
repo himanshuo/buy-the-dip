@@ -20,4 +20,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
       - name: Run script
+        env:
+          MAILGUN_SEND_KEY: ${{ secrets.MAILGUN_SEND_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: python main.py
