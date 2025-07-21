@@ -24,7 +24,7 @@ def fetch_stock_data(ticker_symbol):
         return None
 
 def alert(data):
-    threshold = .03
+    threshold = .04
     for key, value in data.items():
         if key == 'current_price':
             pass
@@ -49,7 +49,7 @@ def call_gemini(ticker_symbol):
     config = types.GenerateContentConfig(
         tools=[grounding_tool]
     )
-    query = f'Why was there a drop in stock price for {ticker_symbol} in the past day? Please consult financial news sources, analyst reports, and SEC filings related to Netflix for the past day to figure out why it dropped.'
+    query = f'Why was there a drop in stock price for {ticker_symbol} in the past day? Please consult financial news sources, analyst reports, and SEC filings related to {ticker_symbol} for the past day to figure out why it dropped.'
     response = client.models.generate_content(
         model="gemini-2.5-flash",
         contents=query,
