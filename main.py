@@ -4,6 +4,7 @@ from google import genai
 from google.genai import types
 import os
 import requests
+import math
 from stock_list import TOP_ETFS, SP100
 
 SAFE_STOCK_LIST = TOP_ETFS + SP100
@@ -34,14 +35,12 @@ def alert(data, market_change):
     return False
 
 def screen():
-    alerts = []
     market = fetch_stock_data('VOO')
     market_change = (market['current_price'] - market['price_at_open']) / market['price_at_open']
     for stock in SAFE_STOCK_LIST:
         data = fetch_stock_data(stock)
         if alert(data, market_change):
-            alerts.append((stock, data))
-    return alerts
+            yield stock, data
 
 def call_gemini(ticker_symbol):
     client = genai.Client()
@@ -79,7 +78,7 @@ def format_email_contents(ticker, price_data, gemini_resp):
     price_at_open_str = change_price_str(price_data['current_price'], price_data['price_at_open'])
     price_at_close_str = change_price_str(price_data['current_price'], price_data['price_at_close'])
     price_at_high_str = change_price_str(price_data['current_price'], price_data['price_at_high'])
-
+    buy_amount = math.floor(100/price_data['current_price'])
     return f"""{ticker} 
 
 Price Details:
@@ -87,6 +86,8 @@ Price Details:
 - Price at Open: {price_at_open_str}
 - Previous Close: {price_at_close_str}
 - Day's High: {price_at_high_str}
+
+Buy {buy_amount} shares at {current_price_str}
 
 Gemini Summary:
 {gemini_resp}
