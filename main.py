@@ -23,8 +23,8 @@ def fetch_stock_data(ticker_symbol):
             raise e
         return None
 
-def alert(data):
-    threshold = .04
+def alert(data, market_change):
+    threshold = .04 + (-1.0*market_change)
     for key, value in data.items():
         if key == 'current_price':
             pass
@@ -35,9 +35,11 @@ def alert(data):
 
 def screen():
     alerts = []
+    market = fetch_stock_data('VOO')
+    market_change = (market['current_price'] - market['price_at_open']) / market['price_at_open']
     for stock in SAFE_STOCK_LIST:
         data = fetch_stock_data(stock)
-        if alert(data):
+        if alert(data, market_change):
             alerts.append((stock, data))
     return alerts
 
