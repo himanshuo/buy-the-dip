@@ -17,6 +17,7 @@ def fetch_stock_data(ticker_symbol):
             'price_at_open': ticker.fast_info.open,
             'price_at_close': ticker.fast_info.previous_close,
             'price_at_high': ticker.fast_info.day_high,
+            'name': ticker.info['longName'],
         }
     except Exception as e:
         print(f"An error occurred while fetching data for {ticker_symbol}: {e}")
@@ -26,13 +27,9 @@ def fetch_stock_data(ticker_symbol):
 
 def alert(data, market_change):
     threshold = .03 + (-1.0*market_change)
-    for key, value in data.items():
-        if key == 'current_price':
-            pass
-        else:
-            if value*(1-threshold) > data['current_price']:
-                return True
-    return False
+    current_price = data['current_price']
+    max_comparable_price = max(data['price_at_open'], data['price_at_close'], data['price_at_high'])
+    return max_comparable_price*(1-threshold) > current_price
 
 def screen():
     market = fetch_stock_data('VOO')
@@ -42,7 +39,7 @@ def screen():
         if alert(data, market_change):
             yield stock, data
 
-def call_gemini(ticker_symbol):
+def call_gemini(ticker_symbol, ticker_name):
     client = genai.Client()
     grounding_tool = types.Tool(
         google_search=types.GoogleSearch()
@@ -50,7 +47,7 @@ def call_gemini(ticker_symbol):
     config = types.GenerateContentConfig(
         tools=[grounding_tool]
     )
-    query = f'Why was there a drop in stock price for {ticker_symbol} in the past day? Please consult financial news sources, analyst reports, and SEC filings related to {ticker_symbol} for the past day to figure out why it dropped.'
+    query = f'Why was there a drop in stock price for {ticker_symbol} in the past day? Please consult financial news sources, analyst reports, earnings reports, and SEC filings related to {ticker_name} for today and yesterday to figure out why it dropped.'
     response = client.models.generate_content(
         model="gemini-2.5-flash",
         contents=query,
@@ -97,9 +94,9 @@ Your Buy-The-Dip Bot
 """
 
 def main():
-    for ticker, price_data in screen():
-        gemini_resp = call_gemini(ticker)
-        send_notification(ticker, price_data, gemini_resp)
+    for ticker, stock_data in screen():
+        gemini_resp = call_gemini(ticker, stock_data['name'])
+        send_notification(ticker, stock_data, gemini_resp)
 
 if __name__ == '__main__':
     main()
