@@ -25,7 +25,7 @@ def fetch_stock_data(ticker_symbol):
         return None
 
 def alert(data, market_change):
-    threshold = .04 + (-1.0*market_change)
+    threshold = .03 + (-1.0*market_change)
     for key, value in data.items():
         if key == 'current_price':
             pass
