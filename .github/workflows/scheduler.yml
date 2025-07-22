@@ -2,8 +2,8 @@ name: Run Hourly Script
 
 on:
   schedule:
-    # Runs every day at 8:30 AM PT (specified here in UTC)
-    - cron: '30 17 * * *'
+    # Runs every day at 6:32 AM PT, 7:32 AM PT, 11:32 AM PT, 4:32 PM PT (specified here in UTC)
+    - cron: '32 13,14,18,23 * * *'
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 jobs:
