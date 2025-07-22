@@ -8,9 +8,10 @@
 - [x] For each safe stock, fetch prices to see if anything sudden has happened
   - [ ] Bollinger bands
   - [x]  Open/close has greater than 3%
-  - [ ] Compare to see if it matches the sp500 or the index that the stock belongs to
+  - [x] Compare to see if it matches the sp500 or the index that the stock belongs to
 - [x] Gemini search to see if anything big has happened with the stock causing this  
 - [ ] More Gemini searches to predict.  
+  - [ ] How likely is this to be a short term vs long term thing 
 - [x] send alert
 - [x] running every hour
 - [ ] send email for a given stock no more than 1 per day
