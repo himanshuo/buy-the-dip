@@ -234,6 +234,98 @@ class SchwabClient:
             if e.response:
                 print(f"Response content: {e.response.text}")
 
+    def place_sell_order(self, ticker, quantity, limit_price, stop_market_price):
+        """
+        Places a SELL OCO order through the Schwab API.
+        There are 2 legs to this order - a SELL LIMIT order for the top end,
+        and a SELL STOP MARKET order for the bottom end.
+        The high price is the SELL LIMIT order - this is used for taking our wins.
+        The low price is the SELL STOP MARKET order - this is used for ensuring a loss isn't too big.
+
+        Args:
+            ticker: The stock symbol to buy.
+            quantity: The number of shares to buy.
+            limit_price: The limit price to sell at. This is the high price.
+            stop_market_price: The stop market price to sell at. This is the low price.
+
+        Returns:
+            The JSON response from the API.
+        """
+        if quantity == 0:
+            print(f"Skipping SELL for {ticker} because quantity is 0.")
+            return
+        if limit_price < stop_market_price:
+            raise ValueError(f"Limit price must be greater than stop market price: Limit price ${limit_price} is less than the stop market price ${stop_market_price}")
+
+        endpoint = f"https://api.schwabapi.com/trader/v1/accounts/{self.account_num_hash}/orders"
+        cancel_time = (datetime.now() + timedelta(days=60)).isoformat(timespec='milliseconds') + 'Z'
+
+
+        sell_oco_order = {
+            "orderStrategyType": 'OCO',
+            "childOrderStrategies":[
+                {
+                    "session": "NORMAL",
+                    "duration": "GOOD_TILL_CANCEL",
+                    "cancelTime": cancel_time,
+                    "price": limit_price,
+                    "orderType": "LIMIT",
+                    "orderStrategyType": "SINGLE",
+                    "orderLegCollection": [
+                        {
+                            "orderLegType": "EQUITY",
+                            "instruction": "SELL",
+                            "quantity": quantity,
+                            "quantityType": "SHARES",
+                            "instrument": {
+                                "symbol": ticker.upper(),
+                                "assetType": "EQUITY"
+                            },
+                            "positionEffect": "AUTOMATIC",
+                            "legId": "1"
+                        }
+                    ]
+                },
+                {
+                    "session": "NORMAL",
+                    "duration": "GOOD_TILL_CANCEL",
+                    "cancelTime": cancel_time,
+                    "stopPrice": stop_market_price,
+                    "orderType": "STOP",
+                    "orderStrategyType": "SINGLE",
+                    "orderLegCollection": [
+                        {
+                            "orderLegType": "EQUITY",
+                            "instruction": "SELL",
+                            "quantity": quantity,
+                            "quantityType": "SHARES",
+                            "instrument": {
+                                "symbol": ticker.upper(),
+                                "assetType": "EQUITY"
+                            },
+                            "positionEffect": "AUTOMATIC",
+                            "legId": "1"
+                        }
+                    ]
+                },
+            ],
+        }
+        print(f"POST {endpoint} \n {sell_oco_order}")
+        try:
+            response = requests.post(
+                endpoint,
+                headers={
+                    "Authorization": f"Bearer {self.access_token}"
+                },
+                json=sell_oco_order)
+            print(response.text)
+            response.raise_for_status()  # Raise an exception for bad status codes
+            print(f"Sell OCO order placed successfully. status code = {response.status_code}")
+        except requests.exceptions.RequestException as e:
+            print(f"An error occurred while placing the sell oco order: {e}")
+            if e.response:
+                print(f"Response content: {e.response.text}")
+
 if __name__ == '__main__':
     client = SchwabClient()
     # client.view_positions()

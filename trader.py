@@ -13,13 +13,16 @@ def ensure_sell_limit_orders_for_all():
         basis_price = current_position['averagePrice']
         current_price = fetch_stock_data(current_position['instrument']['symbol'])['current_price']
         base_price_for_selling = max(basis_price, current_price)
-        price_to_sell = round(base_price_for_selling * 1.04, 2)
+        high_price_to_sell = round(base_price_for_selling * 1.04, 2)
+        low_price_to_sell = round(base_price_for_selling * 0.97, 2)
         qty = math.floor(current_position['longQuantity'])
-        # client.place_trade('sell', current_position['instrument']['symbol'], qty, price_to_sell)
+        client.place_sell_order(current_position['instrument']['symbol'], qty, high_price_to_sell, low_price_to_sell)
 
 
 def main():
     ensure_sell_limit_orders_for_all()
+    # client = SchwabClient()
+    # client.place_sell_order('HUYA', 1, 4, 3.6)
     # client.view_positions()
     # client.view_open_orders()
     # client.place_trade("buy", "IQ", 2, 1.5)
