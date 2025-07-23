@@ -18,3 +18,6 @@
 - [ ] Ask user for decision, or more questions.
 - [ ] Eventually buy or not. 
 - [ ] If buy, but at current price with auto sell at original and also auto sell if falls more than 3%. 
+
+
+https://docs.google.com/document/d/15yAHxshekeZqAm-DkZtsDtQDquoBlJAtk1_l5wUXv9Q/edit?tab=t.0
