@@ -12,12 +12,13 @@ SAFE_STOCK_LIST = TOP_ETFS + SP100
 def fetch_stock_data(ticker_symbol):
     try:
         ticker = yf.Ticker(ticker_symbol)
+        name = ticker.info['longName'] if ticker.info.__contains__('longName') else ticker.info['shortName']
         return {
             'current_price': ticker.fast_info.last_price,
             'price_at_open': ticker.fast_info.open,
             'price_at_close': ticker.fast_info.previous_close,
             'price_at_high': ticker.fast_info.day_high,
-            'name': ticker.info['longName'],
+            'name': name,
         }
     except Exception as e:
         print(f"An error occurred while fetching data for {ticker_symbol}: {e}")

@@ -157,14 +157,21 @@ class SchwabClient:
         return response.json()
 
     def view_open_orders(self):
+        open_orders = []
+        working_orders = self.make_view_open_orders_request("WORKING")
+        pending_activation_orders = self.make_view_open_orders_request("PENDING_ACTIVATION")
+        open_orders.extend(working_orders)
+        open_orders.extend(pending_activation_orders)
+        return open_orders
+
+    def make_view_open_orders_request(self, status):
         old_time = "2025-07-01T00:00:00.000Z"
         new_time_obj = datetime.now() + timedelta(hours=24)
-        new_time = new_time_obj.strftime('%Y-%m-%dT%H:%M:%S') + f'.{new_time_obj.microsecond//1000:03d}Z'
-        status = "WORKING" # NEW
-        response = requests.get(
-            f"https://api.schwabapi.com/trader/v1/accounts/{self.account_num_hash}/orders?fromEnteredTime={old_time}&toEnteredTime={new_time}&status={status}",
-            headers={"Authorization": f"Bearer {self.access_token}"}
-        )
+        new_time = new_time_obj.strftime('%Y-%m-%dT%H:%M:%S') + f'.{new_time_obj.microsecond // 1000:03d}Z'
+        url_prefix = f"https://api.schwabapi.com/trader/v1/accounts/{self.account_num_hash}/orders?fromEnteredTime={old_time}&toEnteredTime={new_time}"
+        headers = {"Authorization": f"Bearer {self.access_token}"}
+
+        response = requests.get(url_prefix + f"&status={status}", headers=headers)
         print(response, response.text)
         return response.json()
 
@@ -181,6 +188,9 @@ class SchwabClient:
         Returns:
             The JSON response from the API.
         """
+        if quantity == 0:
+            print(f"Skipping {action} for {ticker} because quantity is 0.")
+            return
         endpoint = f"https://api.schwabapi.com/trader/v1/accounts/{self.account_num_hash}/orders"
         cancel_time = (datetime.now() + timedelta(days=60)).isoformat(timespec='milliseconds') + 'Z'
 

@@ -1,0 +1,36 @@
+[
+  {
+    "session": "NORMAL",
+    "duration": "GOOD_TILL_CANCEL",
+    "orderType": "LIMIT",
+    "cancelTime": "2025-09-20T13:47:38+0000",
+    "complexOrderStrategyType": "NONE",
+    "quantity": 2.0,
+    "filledQuantity": 0.0,
+    "remainingQuantity": 2.0,
+    "requestedDestination": "AUTO",
+    "destinationLinkName":"AutoRoute",
+    "price":2.1,
+    "orderLegCollection":[{
+      "orderLegType":"EQUITY",
+      "legId":1,
+      "instrument":{
+        "assetType":"EQUITY",
+        "cusip":"46267X108",
+        "symbol":"IQ",
+        "instrumentId":67152887
+      },
+      "instruction":"SELL",
+      "positionEffect":"CLOSING",
+      "quantity":2.0
+    }],
+    "orderStrategyType":"SINGLE",
+    "orderId":1003782538251,
+    "cancelable":true,
+    "editable":true,
+    "status":"PENDING_ACTIVATION",
+    "enteredTime":"2025-07-22T20: 47:38+0000",
+    "tag":"TA_himanshuogmailcom1738672439",
+    "accountNumber":80806673
+  }
+]
