@@ -175,21 +175,20 @@ class SchwabClient:
         print(response, response.text)
         return response.json()
 
-    def place_trade(self, action, ticker, quantity, limit_price):
+    def place_buy_order(self, ticker, quantity, limit_price):
         """
-        Places a trade through the Schwab API.
+        Places a BUY LIMIT order through the Schwab API.
 
         Args:
-            action: 'buy' or 'sell'.
-            ticker: The stock symbol to trade.
-            quantity: The number of shares to trade.
-            limit_price: The limit price if the order_type is 'limit'.
+            ticker: The stock symbol to buy.
+            quantity: The number of shares to buy.
+            limit_price: The limit price.
 
         Returns:
             The JSON response from the API.
         """
         if quantity == 0:
-            print(f"Skipping {action} for {ticker} because quantity is 0.")
+            print(f"Skipping BUY for {ticker} because quantity is 0.")
             return
         endpoint = f"https://api.schwabapi.com/trader/v1/accounts/{self.account_num_hash}/orders"
         cancel_time = (datetime.now() + timedelta(days=60)).isoformat(timespec='milliseconds') + 'Z'
@@ -208,7 +207,7 @@ class SchwabClient:
             "orderLegCollection": [
                 {
                     "orderLegType": "EQUITY",
-                    "instruction": action.upper(),
+                    "instruction": "BUY",
                     "quantity": quantity,
                     "quantityType": "SHARES",
                     "instrument": {
@@ -229,9 +228,9 @@ class SchwabClient:
                 },
                 json=body_limit_order)
             response.raise_for_status()  # Raise an exception for bad status codes
-            print(f"Limit order placed successfully. status code = {response.status_code}")
+            print(f"Buy Limit order placed successfully. status code = {response.status_code}")
         except requests.exceptions.RequestException as e:
-            print(f"An error occurred while placing the trade: {e}")
+            print(f"An error occurred while placing the buy limit order: {e}")
             if e.response:
                 print(f"Response content: {e.response.text}")
 

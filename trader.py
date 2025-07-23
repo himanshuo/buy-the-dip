@@ -15,7 +15,7 @@ def ensure_sell_limit_orders_for_all():
         base_price_for_selling = max(basis_price, current_price)
         price_to_sell = round(base_price_for_selling * 1.04, 2)
         qty = math.floor(current_position['longQuantity'])
-        client.place_trade('sell', current_position['instrument']['symbol'], qty, price_to_sell)
+        # client.place_trade('sell', current_position['instrument']['symbol'], qty, price_to_sell)
 
 
 def main():
