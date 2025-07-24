@@ -71,22 +71,37 @@ def screen():
         if alert(data, market_change):
             yield stock, data
 
-def ask_long_term(why_drop):
-    query = f"I asked gemini why there was a price drop for the stock and it provided me with the below response. Can you read it, think about the response, and tell me if the reason for the drop is long term or medium term? At the end of your response, just say yes or no.  \n\n {why_drop}"
-    is_long_term = call_gemini(query)
-    if str(is_long_term[-3:]).lower() == 'yes':
-        return True
-    return False
-
-def ask_if_actually_drop(why_drop):
-    query = f"I asked gemini why there was a price drop for the stock and it provided me with the below response. Can you read it, think about the response, and tell me if the reason for the drop is long term or medium term? At the end of your response, just say yes or no.  \n\n {why_drop}"
-    return call_gemini(query)
-
 def ask_why_drop(ticker_symbol, ticker_name):
     query = (f'Why was there a drop in stock price for {ticker_symbol} in the past day? Please consult financial news '
              f'sources, analyst reports, earnings reports, and SEC filings related to {ticker_name} for today and '
              f'yesterday to figure out why it dropped.')
     return call_gemini(query)
+
+def ask_if_actually_drop(why_drop):
+    query = f"I asked gemini why there was a price drop for the stock and it provided me with the below response. Can you read it, think about the response, and tell me if the response actually thinks there was a drop? Yes means there was a drop. At the end of your response, just say yes or no.  \n\n {why_drop}"
+    is_drop = call_gemini(query)
+    return is_yes_result(is_drop)
+
+def ask_long_term(why_drop):
+    query = f"I asked gemini why there was a price drop for the stock and it provided me with the below response. Can you read it, think about the response, and tell me if the reason for the drop is long term, medium or short term? At the end of your response, just say long, medium, or short.  \n\n {why_drop}"
+    is_long_term = call_gemini(query)
+    return is_long_term_result(is_long_term)
+
+def is_yes_result(gemini_response):
+    relevant_response = gemini_response[-4:]
+    relevant_response = strip_fluff(relevant_response)
+    return relevant_response == 'yes'
+
+def is_long_term_result(gemini_response):
+    relevant_response = gemini_response[-5:]
+    relevant_response = strip_fluff(relevant_response)
+    return relevant_response == 'long'
+
+def strip_fluff(resp):
+    resp = resp.lower()
+    resp = resp.strip()
+    resp = resp.strip('.')
+    return resp
 
 def call_gemini(query):
     client = genai.Client()
@@ -144,9 +159,12 @@ Your Buy-The-Dip Bot
 def main():
     for ticker, stock_data in screen():
         why_drop = ask_why_drop(ticker, stock_data['name'])
+        is_drop = ask_if_actually_drop(why_drop)
+        if not is_drop:
+            continue
         is_long_term = ask_long_term(why_drop)
-        if not is_long_term:
-            send_notification(ticker, stock_data, why_drop)
-
+        if is_long_term:
+            continue
+        send_notification(ticker, stock_data, why_drop)
 if __name__ == '__main__':
     main()
