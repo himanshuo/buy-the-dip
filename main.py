@@ -18,6 +18,7 @@ def fetch_stock_data(ticker_symbol):
             'price_at_open': ticker.fast_info.open,
             'price_at_close': ticker.fast_info.previous_close,
             'price_at_high': ticker.fast_info.day_high,
+            'yesterday_low': ticker.history(period='2d').Low.iloc[0],
             'name': name,
         }
     except Exception as e:
@@ -27,10 +28,21 @@ def fetch_stock_data(ticker_symbol):
         return None
 
 def alert(data, market_change):
-    threshold = .03 + (-1.0*market_change)
+    if rapid_growth(data):
+        return False
+
+    return current_price_dipped_relative_to_market(data, market_change)
+
+def current_price_dipped_relative_to_market(data, market_change):
+    threshold = .03 + (-1.0 * market_change)
     current_price = data['current_price']
     max_comparable_price = max(data['price_at_open'], data['price_at_close'], data['price_at_high'])
-    return max_comparable_price*(1-threshold) > current_price
+    return max_comparable_price * (1 - threshold) > current_price
+
+def rapid_growth(data):
+    current_price = data['current_price']
+    yesterday_low = data['yesterday_low']
+    return yesterday_low * 1.07 < current_price
 
 def screen():
     market = fetch_stock_data('VOO')
