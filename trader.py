@@ -12,9 +12,10 @@ def ensure_sell_limit_orders_for_all():
             continue
         basis_price = current_position['averagePrice']
         current_price = fetch_stock_data(current_position['instrument']['symbol'])['current_price']
-        base_price_for_selling = max(basis_price, current_price)
-        high_price_to_sell = round(base_price_for_selling * 1.04, 2)
-        low_price_to_sell = round(base_price_for_selling * 0.97, 2)
+        base_price_for_high_selling = max(basis_price, current_price)
+        high_price_to_sell = round(base_price_for_high_selling * 1.04, 2)
+        base_price_for_low_selling = basis_price
+        low_price_to_sell = round(base_price_for_low_selling * 0.97, 2)
         qty = math.floor(current_position['longQuantity'])
         client.place_sell_order(current_position['instrument']['symbol'], qty, high_price_to_sell, low_price_to_sell)
 
