@@ -6,7 +6,7 @@ def ensure_sell_limit_orders_for_all():
     client = SchwabClient()
     current_positions = client.view_positions()['securitiesAccount']['positions']
     open_orders = client.view_open_orders()
-    tickers_with_open_orders = [order['orderLegCollection'][0]['instrument']['symbol'] for order in open_orders]
+    tickers_with_open_orders = [order['childOrderStrategies'][0]['orderLegCollection'][0]['instrument']['symbol'] for order in open_orders]
     for current_position in current_positions:
         if current_position['instrument']['symbol'] in tickers_with_open_orders:
             continue
