@@ -6,6 +6,7 @@ import os
 import requests
 import math
 from stock_list import TOP_ETFS, SP100
+import numpy as np
 
 SAFE_STOCK_LIST = TOP_ETFS + SP100
 
@@ -13,12 +14,14 @@ def fetch_stock_data(ticker_symbol):
     try:
         ticker = yf.Ticker(ticker_symbol)
         name = ticker.info['longName'] if ticker.info.__contains__('longName') else ticker.info['shortName']
+        slope = get_slope(ticker)
         return {
             'current_price': ticker.fast_info.last_price,
             'price_at_open': ticker.fast_info.open,
             'price_at_close': ticker.fast_info.previous_close,
             'price_at_high': ticker.fast_info.day_high,
             'yesterday_low': ticker.history(period='2d').Low.iloc[0],
+            '2y_slope': slope,
             'name': name,
         }
     except Exception as e:
@@ -27,8 +30,20 @@ def fetch_stock_data(ticker_symbol):
             raise e
         return None
 
+def get_slope(ticker):
+    ylist = ticker.history(period='2y', interval='1mo').Close
+    xlist = [i for i in range(0, len(ylist))]
+
+    line = np.polyfit(xlist, ylist, deg=1)
+    slope = line[0]
+    return slope
+
 def alert(data, market_change):
     if rapid_growth(data):
+        print(f"Skipping {data['name']} because of recent rapid growth")
+        return False
+    if downwards_slope(data):
+        print(f"Skipping {data['name']} because of 2-year downwards slope")
         return False
 
     return current_price_dipped_relative_to_market(data, market_change)
@@ -43,6 +58,10 @@ def rapid_growth(data):
     current_price = data['current_price']
     yesterday_low = data['yesterday_low']
     return yesterday_low * 1.07 < current_price
+
+def downwards_slope(data):
+    slope = data['2y_slope']
+    return slope < 0
 
 def screen():
     market = fetch_stock_data('VOO')
@@ -108,8 +127,9 @@ Your Buy-The-Dip Bot
 
 def main():
     for ticker, stock_data in screen():
-        gemini_resp = call_gemini(ticker, stock_data['name'])
-        send_notification(ticker, stock_data, gemini_resp)
+        print(ticker, stock_data)
+        # gemini_resp = call_gemini(ticker, stock_data['name'])
+        # send_notification(ticker, stock_data, gemini_resp)
 
 if __name__ == '__main__':
     main()
