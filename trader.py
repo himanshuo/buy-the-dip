@@ -28,10 +28,8 @@ def setup_buy_orders():
 
 
 def main():
-    # ensure_sell_limit_orders_for_all()
-    # setup_buy_orders()
-    client = SchwabClient()
-    client.place_sell_order('IAU', 1, 66)
+    ensure_sell_limit_orders_for_all()
+    setup_buy_orders()
 
     # client = SchwabClient()
     # client.place_sell_order('HUYA', 1, 4, 3.6)
