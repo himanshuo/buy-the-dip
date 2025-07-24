@@ -71,7 +71,24 @@ def screen():
         if alert(data, market_change):
             yield stock, data
 
-def call_gemini(ticker_symbol, ticker_name):
+def ask_long_term(why_drop):
+    query = f"I asked gemini why there was a price drop for the stock and it provided me with the below response. Can you read it, think about the response, and tell me if the reason for the drop is long term or medium term? At the end of your response, just say yes or no.  \n\n {why_drop}"
+    is_long_term = call_gemini(query)
+    if str(is_long_term[-3:]).lower() == 'yes':
+        return True
+    return False
+
+def ask_if_actually_drop(why_drop):
+    query = f"I asked gemini why there was a price drop for the stock and it provided me with the below response. Can you read it, think about the response, and tell me if the reason for the drop is long term or medium term? At the end of your response, just say yes or no.  \n\n {why_drop}"
+    return call_gemini(query)
+
+def ask_why_drop(ticker_symbol, ticker_name):
+    query = (f'Why was there a drop in stock price for {ticker_symbol} in the past day? Please consult financial news '
+             f'sources, analyst reports, earnings reports, and SEC filings related to {ticker_name} for today and '
+             f'yesterday to figure out why it dropped.')
+    return call_gemini(query)
+
+def call_gemini(query):
     client = genai.Client()
     grounding_tool = types.Tool(
         google_search=types.GoogleSearch()
@@ -79,7 +96,6 @@ def call_gemini(ticker_symbol, ticker_name):
     config = types.GenerateContentConfig(
         tools=[grounding_tool]
     )
-    query = f'Why was there a drop in stock price for {ticker_symbol} in the past day? Please consult financial news sources, analyst reports, earnings reports, and SEC filings related to {ticker_name} for today and yesterday to figure out why it dropped.'
     response = client.models.generate_content(
         model="gemini-2.5-flash",
         contents=query,
@@ -127,9 +143,10 @@ Your Buy-The-Dip Bot
 
 def main():
     for ticker, stock_data in screen():
-        print(ticker, stock_data)
-        # gemini_resp = call_gemini(ticker, stock_data['name'])
-        # send_notification(ticker, stock_data, gemini_resp)
+        why_drop = ask_why_drop(ticker, stock_data['name'])
+        is_long_term = ask_long_term(why_drop)
+        if not is_long_term:
+            send_notification(ticker, stock_data, why_drop)
 
 if __name__ == '__main__':
     main()
