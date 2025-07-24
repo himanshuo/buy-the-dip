@@ -167,6 +167,7 @@ def main():
         is_long_term = ask_long_term(why_drop)
         if is_long_term:
             continue
+        print(f"Sending notification for {ticker} {stock_data} {why_drop}")
         send_notification(ticker, stock_data, why_drop)
 if __name__ == '__main__':
     main()
