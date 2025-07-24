@@ -22,6 +22,7 @@ def fetch_stock_data(ticker_symbol):
             'price_at_high': ticker.fast_info.day_high,
             'yesterday_low': ticker.history(period='2d').Low.iloc[0],
             '2y_slope': slope,
+            'is_etf': ticker_symbol in TOP_ETFS,
             'name': name,
         }
     except Exception as e:
@@ -49,10 +50,11 @@ def alert(data, market_change):
     return current_price_dipped_relative_to_market(data, market_change)
 
 def current_price_dipped_relative_to_market(data, market_change):
-    threshold = .03 + (-1.0 * market_change)
+    threshold = .01 if data['is_etf'] else .03
+    threshold_with_mkt_chng = threshold + (-1.0 * market_change)
     current_price = data['current_price']
     max_comparable_price = max(data['price_at_open'], data['price_at_close'], data['price_at_high'])
-    return max_comparable_price * (1 - threshold) > current_price
+    return max_comparable_price * (1 - threshold_with_mkt_chng) > current_price
 
 def rapid_growth(data):
     current_price = data['current_price']
