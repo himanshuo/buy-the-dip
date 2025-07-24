@@ -18,9 +18,20 @@ def ensure_sell_limit_orders_for_all():
         qty = math.floor(current_position['longQuantity'])
         client.place_sell_order(current_position['instrument']['symbol'], qty, high_price_to_sell, low_price_to_sell)
 
+def setup_buy_orders():
+    tickers_to_buy = []
+
+    client = SchwabClient()
+    for ticker in tickers_to_buy:
+        limit_price = round(fetch_stock_data(ticker)['current_price'], 2)
+        quantity = 1
+        client.place_buy_order(ticker, quantity, limit_price)
+
 
 def main():
     ensure_sell_limit_orders_for_all()
+    setup_buy_orders()
+
     # client = SchwabClient()
     # client.place_sell_order('HUYA', 1, 4, 3.6)
     # client.view_positions()
